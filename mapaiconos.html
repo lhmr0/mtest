@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Icono perzonalizado</title>
+    <style>
+      #map {
+        height: 100%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+
+
+      function initMap() {
+        var ubicacion = {lat: -8.1277569, lng: -79.0329474};      
+        var icons = {          
+          info: {
+            icon: 'http://m.hmr0.me/darthE.png'
+          }
+        };  
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 16,
+          center: ubicacion
+        });   
+
+    
+
+        var markers=  [{
+            position: {lat: -8.1274836, lng: -79.0319926},
+           type : 'info'
+          }, {
+            position: {lat: -8.1288996, lng: -79.0312268},
+            type : 'info'
+          }, {
+            position: {lat: -8.1285196, lng: -79.0278064},
+            type : 'info'
+          }];
+
+           markers.forEach(function(feature) {
+          var marker = new google.maps.Marker({
+            position: feature.position,
+            icon: icons[feature.type].icon,
+            animation: google.maps.Animation.BOUNCE,
+            map: map
+          });
+        });     
+         
+       
+      }
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJQqUbo_3ML5yoeHUEWmeS0Er7yk7ph8c&callback=initMap">
+    </script>
+  </body>
+</html>
