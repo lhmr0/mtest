@@ -19,8 +19,9 @@
       :clickable="true"
       @click="toggleInfoWindow(m,i)"
     ></gmap-marker>
-  </gmap-map></center>  
+  </gmap-map>  
    <button class="button is-primary" @click="ubicacion()">Ubicarme</button>
+   </center>
   <center>
       <h2 class="subtitle">
         Reporta tus incidentes</h2>
@@ -45,32 +46,33 @@
                       </b-field>
 
                   <b-field>
-                  <b-radio-button v-model="radioButton"
+                  <b-radio-button v-model="incidente.radioButton"
                       native-value="Robo"
                       type="is-danger">
                       <span>Robo</span>
                   </b-radio-button>
 
-                  <b-radio-button v-model="radioButton"
+                  <b-radio-button v-model="incidente.radioButton"
                       native-value="Secuestro"
                       type="is-danger">
                       <span>Secuestro</span>
                   </b-radio-button>
 
-                  <b-radio-button v-model="radioButton"
+                  <b-radio-button v-model="incidente.radioButton"
                       native-value="Pelea"
                       type="is-danger">
                       Pelea
                   </b-radio-button>
-                  <b-radio-button v-model="radioButton"
+                  <b-radio-button v-model="incidente.radioButton"
                       native-value="Asesinato"
                       type="is-danger">
                       Asesinato
                   </b-radio-button>
-                  <p class="content nigru">
-                    <b> Seleccion:</b>
-                  {{ radioButton }}
-                    </p>
+                  
+                  <b-field label="Seleccion:" class="content nigru">
+                  {{ incidente.radioButton }}
+                  </b-field>
+                   
                   </b-field>     
                  <b-field label="Descripcion">
                     <b-input
@@ -80,6 +82,39 @@
                         required>
                     </b-input>
                 </b-field>
+
+                <div class="file has-name is-success">
+                  <label class="file-label">
+                    <input class="file-input" type="file" name="resume" accept=".jpg, .png, .gif">
+                    <span class="file-cta">
+                      <span class="file-icon">
+                        <i class="fa fa-upload"></i>
+                      </span>
+                      <span class="file-label">
+                        Selecciona una imagen
+                      </span>
+                    </span>
+                    <span class="file-name" v-if="imagen">
+                      {{imagen.name}}
+                    </span>
+                  </label>
+                </div>
+
+
+
+
+
+                <label class="file-select">
+    <!-- We can't use a normal button element here, as it would become the target of the label. -->
+    <div class="select-button">
+      <!-- Display the filename if a file has been selected. -->
+      <span v-if="value">Selected File: {{value.name}}</span>
+      <span v-else>Select File</span>
+    </div>
+    <!-- Now, the file input that we hide. -->
+    <input type="file" @change="handleFileChange"/>
+  </label>
+ <button class="button" type="button" v-on:click="upload(value)">subir</button>
 
                 
             </section>
@@ -103,6 +138,7 @@
 
 <script>  
 import Firebase from 'firebase';
+import * as axios from 'axios';
   export default {
        data () {
           return {    
@@ -112,10 +148,17 @@ import Firebase from 'firebase';
                 incidente: {
                   titulo: null,
                   descripcion: null,
+                  radioButton:null,
+                },
+                value: {
+                  name: "",
                 },
                 titulo:'',
                 descripcion:'',
-                moda:'80%',    
+                categoria:'',
+                lati:'',
+                longi:'',
+                moda:'80%',  
             currentLocation: {lat: 0, lng: 0},
             center: {lat: -8.1285196, lng: -79.0278064},  
             infoContent: '5',
@@ -152,14 +195,21 @@ import Firebase from 'firebase';
             infoText: 'Reporte de incidente #3'
           }, {
             position: {
-              lat: -79.0278064, 
-              lng: -79.0278064},
+              lat: -8.134,
+             lng: -79.0319926},
             infoText: 'Reporte de incidente #3'
           }]          
 
            
           }
         },
+created() {        
+    var db = Firebase.database();
+    db.ref(`incidentes/incidentes/Luis_`)
+    .on('value',snapshot =>this.cargarMensajes(snapshot.val()));
+       
+    
+  },  
         methods: {
           toggleInfoWindow: function(marker, idx) {
             this.infoWindowPos = marker.position;
@@ -178,7 +228,10 @@ import Firebase from 'firebase';
             var db = Firebase.database();
             db.ref(`incidentes/incidentes/Luis_`).push({
               titulo:this.incidente.titulo,
-              descripcion:this.incidente.descripcion
+              descripcion:this.incidente.descripcion,
+              categoria:this.incidente.radioButton,
+              lat: this.currentLat,
+              lon: this.currentLon
 
             }).then(()=>this.incidente.titulo='')
          },
@@ -190,11 +243,37 @@ import Firebase from 'firebase';
         };
         this.currentLon = position.coords.longitude;
         this.currentLat = position.coords.latitude;
-          window.document.title = this.currentLon +" "+ this.currentLat;  
+          alert("Ubicacion encontrada! " + this.currentLon +" "+ this.currentLat)
         console.log(this.currentLon +" "+ this.currentLat);
       });
     
-         }
+         },
+         cargarMensajes(incidents){
+      console.log(incidents)
+      this.incidentes=[]
+      for(let key in incidents){
+        this.incidentes.push({
+         titulo:incidents[key].titulo,
+         descripcion:incidents[key].descripcion
+         
+        })
+      } 
+      console.log(this.titulo+this.descripcion+"asd");
+    },
+         handleFileChange(e) {
+      // Whenever the file changes, emit the 'input' event with the file data.
+      this.$emit('input', e.target.files[0])
+    },
+    upload(formData) {
+    const url = `https://lhmr0.000webhostapp.com/upload.php`;
+        axios.get(url, formData)
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+}
         }
 
      
